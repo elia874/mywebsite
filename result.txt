@@ -1,6 +1,3 @@
-COMMAND: curl ifconfig.me
+COMMAND: python3 --version
 OUTPUT:
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100    13  100    13    0     0     92      0 --:--:-- --:--:-- --:--:--    92
-20.161.68.241
+Python 3.12.3
