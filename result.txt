@@ -1,3 +1,3 @@
-COMMAND: 
+COMMAND: whoami
 OUTPUT:
-
+runner
