@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Sandbox</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap');
+  :root {
+    --bg: #0a0a0a; --surface: #111; --border: #222;
+    --green: #00ff88; --yellow: #ffd900; --red: #ff4444;
+    --blue: #4488ff; --text: #e0e0e0; --muted: #555;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh; display: flex;
+    flex-direction: column; align-items: center; padding: 24px 16px;
+  }
+  .terminal {
+    width: 100%; max-width: 860px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+    box-shadow: 0 0 60px #00ff8811, 0 20px 60px #00000088;
+  }
+  .titlebar {
+    background: #161616; border-bottom: 1px solid var(--border);
+    padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+  }
+  .dots { display:flex; gap:7px; }
+  .dot { width:12px; height:12px; border-radius:50%; }
+  .dot.red { background:#ff5f56; } .dot.yellow { background:#ffbd2e; } .dot.green { background:#27c93f; }
+  .title { flex:1; text-align:center; font-size:12px; color:var(--muted); letter-spacing:2px; text-transform:uppercase; }
+  .status-dot { width:8px; height:8px; border-radius:50%; background:var(--muted); transition:all 0.3s; }
+  .status-dot.online { background:var(--green); box-shadow:0 0 8px var(--green); }
+  .status-dot.busy { background:var(--yellow); box-shadow:0 0 8px var(--yellow); }
+  .status-dot.error { background:var(--red); box-shadow:0 0 8px var(--red); }
+  .config {
+    padding: 16px; border-bottom: 1px solid var(--border);
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+  }
+  .config input {
+    background:#0d0d0d; border:1px solid var(--border); border-radius:6px;
+    padding:8px 12px; color:var(--text); font-family:'JetBrains Mono',monospace;
+    font-size:12px; outline:none; transition:border-color 0.2s; width:100%;
+  }
+  .config input:focus { border-color:var(--green); }
+  .config input::placeholder { color:var(--muted); }
+  .config-label { font-size:10px; color:var(--muted); margin-bottom:4px; letter-spacing:1px; text-transform:uppercase; }
+  .output {
+    height: 420px; overflow-y: auto; padding: 16px;
+    font-size: 13px; line-height: 1.7;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  }
+  .output::-webkit-scrollbar { width:4px; }
+  .output::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+  .line { display:flex; gap:10px; margin-bottom:4px; }
+  .line .ts { color:var(--muted); font-size:11px; min-width:80px; }
+  .line .msg { flex:1; word-break:break-all; }
+  .line.cmd .msg { color:var(--green); }
+  .line.out .msg { color:var(--text); white-space:pre-wrap; }
+  .line.err .msg { color:var(--red); }
+  .line.info .msg { color:var(--blue); }
+  .line.warn .msg { color:var(--yellow); }
+  .inputbar {
+    border-top:1px solid var(--border); padding:14px 16px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .inputbar span { color:var(--green); font-size:14px; }
+  .inputbar input {
+    flex:1; background:transparent; border:none; outline:none;
+    color:var(--text); font-family:'JetBrains Mono',monospace;
+    font-size:13px; caret-color:var(--green);
+  }
+  .inputbar input::placeholder { color:var(--muted); }
+  .run-btn {
+    background:var(--green); color:#000; border:none; border-radius:6px;
+    padding:7px 16px; font-family:'JetBrains Mono',monospace;
+    font-size:12px; font-weight:700; cursor:pointer; letter-spacing:1px; transition:all 0.2s;
+  }
+  .run-btn:hover { background:#00ffaa; transform:translateY(-1px); }
+  .run-btn:disabled { background:var(--muted); cursor:not-allowed; transform:none; }
+  .footer { margin-top:16px; font-size:11px; color:var(--muted); text-align:center; letter-spacing:1px; }
+  .footer a { color:var(--green); text-decoration:none; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="terminal">
+  <div class="titlebar">
+    <div class="dots">
+      <div class="dot red"></div>
+      <div class="dot yellow"></div>
+      <div class="dot green"></div>
+    </div>
+    <div class="title">my-sandbox — github actions terminal</div>
+    <div class="status-dot online" id="statusDot"></div>
+  </div>
+
+  <div class="config">
+    <div>
+      <div class="config-label">GitHub Token</div>
+      <input id="token" type="password" placeholder="ghp_xxxxxxxxxxxx"/>
+    </div>
+    <div>
+      <div class="config-label">Username</div>
+      <input id="user" placeholder="your_username"/>
+    </div>
+    <div>
+      <div class="config-label">Repo</div>
+      <input id="repo" placeholder="my-sandbox"/>
+    </div>
+  </div>
+
+  <div class="output" id="output">
+    <div class="line info"><span class="ts">--:--:--</span><span class="msg">🟢 Sandbox ready — powered by GitHub Actions</span></div>
+    <div class="line info"><span class="ts">--:--:--</span><span class="msg">Fill in config above then type a command below.</span></div>
+    <div class="line warn"><span class="ts">--:--:--</span><span class="msg">⚡ Each command takes ~20-30s (GitHub Action startup time)</span></div>
+  </div>
+
+  <div class="inputbar">
+    <span>❯</span>
+    <input id="cmdInput" placeholder="e.g. whoami  |  curl ifconfig.me  |  ls -la" autocomplete="off" spellcheck="false"/>
+    <button class="run-btn" id="runBtn" onclick="sendCommand()">RUN</button>
+  </div>
+</div>
+<div class="footer">
+  runs on github actions · free ubuntu server · <a onclick="clearOutput()">clear</a>
+</div>
+
+<script>
+  const output = document.getElementById('output');
+  const statusDot = document.getElementById('statusDot');
+
+  function ts() { return new Date().toTimeString().slice(0,8); }
+
+  function log(msg, type='out') {
+    const line = document.createElement('div');
+    line.className = `line ${type}`;
+    line.innerHTML = `<span class="ts">${ts()}</span><span class="msg">${esc(msg)}</span>`;
+    output.appendChild(line);
+    output.scrollTop = output.scrollHeight;
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function setStatus(s) { statusDot.className = 'status-dot ' + s; }
+  function cfg() {
+    return {
+      token: document.getElementById('token').value.trim(),
+      user:  document.getElementById('user').value.trim(),
+      repo:  document.getElementById('repo').value.trim(),
+    };
+  }
+
+  function apiUrl(c, path) {
+    return `https://api.github.com/repos/${c.user}/${c.repo}/contents/${path}`;
+  }
+
+  function hdrs(c) {
+    return {
+      'Authorization': `token ${c.token}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    };
+  }
+
+  async function writeFile(c, path, content, sha) {
+    const body = { message: `cmd: ${content.slice(0,50)}`, content: btoa(unescape(encodeURIComponent(content))) };
+    if (sha) body.sha = sha;
+    const r = await fetch(apiUrl(c, path), { method:'PUT', headers:hdrs(c), body:JSON.stringify(body) });
+    if (!r.ok) throw new Error(`GitHub API error: ${r.status}`);
+    return r.json();
+  }
+
+  async function readFile(c, path) {
+    const r = await fetch(apiUrl(c, path) + '?t=' + Date.now(), { headers: hdrs(c) });
+    if (!r.ok) return null;
+    const d = await r.json();
+    return { content: decodeURIComponent(escape(atob(d.content.replace(/\n/g,'')))), sha: d.sha };
+  }
+
+  async function sendCommand() {
+    const c = cfg();
+    if (!c.token || !c.user || !c.repo) {
+      log('⚠ Fill in GitHub token, username, and repo first!', 'warn'); return;
+    }
+    const input = document.getElementById('cmdInput');
+    const cmd = input.value.trim();
+    if (!cmd) return;
+
+    input.value = '';
+    document.getElementById('runBtn').disabled = true;
+    setStatus('busy');
+    log(`❯ ${cmd}`, 'cmd');
+    log('Sending to GitHub Actions...', 'info');
+
+    try {
+      // Get sha of command.txt if exists
+      const existing = await readFile(c, 'command.txt');
+      // Get sha of result.txt so we know when it changes
+      const oldResult = await readFile(c, 'result.txt');
+      const oldResultSha = oldResult?.sha || null;
+
+      // Write command — this triggers the Action
+      await writeFile(c, 'command.txt', cmd, existing?.sha);
+      log('✅ Command sent! GitHub Action starting... (~20-30s)', 'info');
+
+      // Poll result.txt until sha changes
+      let attempts = 0;
+      const maxAttempts = 120; // 60 seconds
+
+      const timer = setInterval(async () => {
+        attempts++;
+        try {
+          const result = await readFile(c, 'result.txt');
+          if (result && result.sha !== oldResultSha && result.content.includes(`COMMAND: ${cmd}`)) {
+            clearInterval(timer);
+            const lines = result.content.split('\n');
+            const out = lines.slice(2).join('\n').trim();
+            log(out || '(no output)', 'out');
+            setStatus('online');
+            document.getElementById('runBtn').disabled = false;
+          } else if (attempts >= maxAttempts) {
+            clearInterval(timer);
+            log('⚠ Timeout — Action did not respond in 60s. Check your repo Actions tab.', 'warn');
+            setStatus('error');
+            document.getElementById('runBtn').disabled = false;
+          }
+        } catch(e) { /* still waiting */ }
+      }, 500);
+
+    } catch(err) {
+      log(`Error: ${err.message}`, 'err');
+      setStatus('error');
+      document.getElementById('runBtn').disabled = false;
+    }
+  }
+
+  function clearOutput() { output.innerHTML = ''; log('Terminal cleared.', 'info'); }
+  document.getElementById('cmdInput').addEventListener('keydown', e => { if(e.key==='Enter') sendCommand(); });
+</script>
+</body>
+</html>
