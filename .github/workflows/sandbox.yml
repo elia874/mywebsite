@@ -1,0 +1,35 @@
+name: Sandbox Runner
+
+on:
+  push:
+    paths:
+      - 'command.txt'
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Run command
+        run: |
+          CMD=$(cat command.txt)
+          echo "Running: $CMD"
+          OUTPUT=$(eval "$CMD" 2>&1) || true
+          {
+            echo "COMMAND: $CMD"
+            echo "OUTPUT:"
+            echo "$OUTPUT"
+          } > result.txt
+
+      - name: Push result
+        run: |
+          git config user.email "sandbox-bot@github.com"
+          git config user.name "Sandbox Bot"
+          git add result.txt
+          git diff --staged --quiet || git commit -m "result: $(cat command.txt | head -c 50)"
+          git push
