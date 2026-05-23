@@ -1,1 +1,1 @@
-curl ifconfig.me
+python3 --version
