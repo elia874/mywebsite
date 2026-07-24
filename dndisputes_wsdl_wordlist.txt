@@ -1,0 +1,88 @@
+# === dndisputes_wsdl_wordlist.txt ===
+# Targeted wordlist for WSDL/SOAP endpoint discovery on dndisputes*.discover.com
+# Built from: (1) generic WSDL query-param/path conventions, (2) common enterprise
+# SOAP stack path patterns (Axis/Axis2, CXF, WCF/.svc, IBM DataPower, Oracle SOA,
+# Mulesoft, WebSphere), (3) naming-pattern guesses from "dndisputes" / "DN" / dispute
+# domain vocabulary (chargeback, claims, adjustment).
+#
+# Usage with smartfuzz (baseline-aware, so 500-vs-200-vs-fault diffing matters more
+# than raw status code here since bare "/" already 500s):
+#   python3 smartfuzz.py --host https://dndisputes.discover.com --wordlist dndisputes_wsdl_wordlist.txt
+#
+# Run this SLOWLY and sequentially first — these gateways may be more sensitive
+# to bursts than a normal web app, and you don't have baseline data on their
+# rate-limiting behavior yet.
+
+# --- bare root WSDL query variants ---
+/?wsdl
+/?WSDL
+/?Wsdl
+/?wsdl=1
+/?singleWsdl
+
+# --- generic /services patterns (Axis2, CXF, Spring-WS common convention) ---
+/services?wsdl
+/services/?wsdl
+/axis2/services?wsdl
+/axis/services?wsdl
+/ws?wsdl
+/wsdl
+/soap?wsdl
+/service?wsdl
+
+# --- .svc pattern (WCF / .NET) ---
+/Service.svc?wsdl
+/Service.svc?singleWsdl
+/DisputeService.svc?wsdl
+/DisputesService.svc?wsdl
+
+# --- naming-pattern guesses based on "dndisputes" / dispute-domain vocabulary ---
+/DNDisputes?wsdl
+/DNDisputesService?wsdl
+/DisputeService?wsdl
+/DisputesService?wsdl
+/Dispute?wsdl
+/Disputes?wsdl
+/DisputeManagement?wsdl
+/DisputeManagementService?wsdl
+/ChargebackService?wsdl
+/ClaimsService?wsdl
+/AdjustmentService?wsdl
+/CaseService?wsdl
+/CaseManagementService?wsdl
+
+# --- axis2/services/{name}?wsdl combos ---
+/axis2/services/DisputeService?wsdl
+/axis2/services/DisputesService?wsdl
+/axis2/services/DNDisputesService?wsdl
+/axis2/services/ChargebackService?wsdl
+/axis2/services/CaseService?wsdl
+
+# --- CXF-style /services/{name} ---
+/services/DisputeService?wsdl
+/services/DisputesService?wsdl
+/services/DNDisputesService?wsdl
+/services/ChargebackService?wsdl
+/services/CaseService?wsdl
+
+# --- version-suffixed variants (common in enterprise APIs) ---
+/DisputeServiceV1?wsdl
+/DisputeServiceV2?wsdl
+/v1/DisputeService?wsdl
+/v2/DisputeService?wsdl
+
+# --- IBM DataPower / gateway-specific probe paths (no ?wsdl needed, gateway meta) ---
+/servlet/soap
+/soap/servlet/messagerouter
+/gateway/wsdl
+/gateway?wsdl
+
+# --- info/discovery endpoints worth checking alongside WSDL ---
+/services
+/services/
+/?listServices
+/admin/services
+/status
+/health
+/actuator
+/actuator/health
