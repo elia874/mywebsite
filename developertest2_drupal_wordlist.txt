@@ -1,0 +1,151 @@
+# === developertest2_drupal_wordlist.txt ===
+# Target: developertest2.discover.com (confirmed Drupal 11, theme: dfs_devportal)
+# Built from documented real-world Drupal recon/vuln classes:
+#  - JSON:API misconfiguration -> user/content enumeration (real published bug class)
+#  - Drupalgeddon-family paths (historical but still worth checking per-version)
+#  - Config export / sensitive file exposure
+#  - Default user/auth flow probing
+#  - Module & composer dependency leakage (version fingerprinting for CVE matching)
+#
+# Usage:
+#   python3 smartfuzz.py --host https://developertest2.discover.com --wordlist developertest2_drupal_wordlist.txt
+#
+# NOTE: some of these are POST-based tests (jsonapi/user/register, password reset) -
+# smartfuzz/curl GET-only fuzzing won't trigger those; see manual POST tests at bottom.
+
+# ============ TIER 1: JSON:API discovery + enumeration (HIGH VALUE - documented real bug class) ============
+/jsonapi
+/jsonapi/
+/jsonapi/node/article
+/jsonapi/node/page
+/jsonapi/node/landing_page
+/jsonapi/user/user
+/jsonapi/taxonomy_term/tags
+/jsonapi/file/file
+/jsonapi/media/image
+/jsonapi/menu_link_content/menu_link_content
+/jsonapi/comment/comment
+/jsonapi/block_content/basic
+/jsonapi/webform/webform
+/jsonapi/webform_submission/webform_submission
+/jsonapi/config_pages/config_pages
+# alternate/hidden base paths some sites use to "obscure" jsonapi
+/api/jsonapi
+/hidden/jsonapi
+/services/jsonapi
+
+# ============ TIER 2: default user/auth routes (enumeration + registration abuse) ============
+/user
+/user/1
+/user/2
+/user/3
+/user/login
+/user/register
+/user/password
+/user/logout
+/user/1/edit
+/admin/people
+/admin/people/create
+
+# ============ TIER 3: node ID / content enumeration (unpublished/draft leaks) ============
+/node/1
+/node/2
+/node/3
+/node/4
+/node/5
+/node/1/edit
+/node/1/revisions
+/node/1/delete
+
+# ============ TIER 4: sensitive/config files (version fingerprinting + secrets) ============
+/CHANGELOG.txt
+/core/CHANGELOG.txt
+/README.txt
+/core/README.txt
+/composer.json
+/composer.lock
+/core/composer.json
+/sites/default/settings.php
+/sites/default/settings.local.php
+/sites/default/services.yml
+/sites/default/default.settings.php
+/.env
+/.git/config
+/.git/HEAD
+/robots.txt
+
+# ============ TIER 5: config export / staging (common Drupal 8+ misconfig) ============
+/admin/config/development/configuration/full/export
+/sites/default/files/config_YYYYMMDD/sync
+/config/sync
+/../config/sync
+
+# ============ TIER 6: install/update scripts (should be blocked post-install) ============
+/core/install.php
+/install.php
+/update.php
+/core/update.php
+/core/authorize.php
+/authorize.php
+
+# ============ TIER 7: module & directory listing exposure ============
+/modules/
+/modules/contrib/
+/modules/custom/
+/themes/
+/themes/custom/dfs_devportal/
+/profiles/
+/sites/default/files/
+/sites/all/modules/
+/vendor/
+/vendor/composer/installed.json
+
+# ============ TIER 8: admin panel / permissions probing ============
+/admin
+/admin/
+/admin/content
+/admin/structure
+/admin/modules
+/admin/reports/status
+/admin/reports/status/php
+/admin/config
+/admin/config/system/site-information
+/admin/config/services/jsonapi
+
+# ============ TIER 9: Views/autocomplete (historical username-leak vuln class) ============
+/admin/views/ajax/autocomplete/user
+/user/autocomplete
+/entity_reference_autocomplete/node
+
+# ============ TIER 10: webform module (common in dev portals for "Contact Us" -> often has known CVEs) ============
+/webform
+/form/contact
+/contact
+/node/add/webform
+
+# ============ TIER 11: API/dev-portal-specific (matches your earlier UI observations) ============
+/api-docs
+/api-catalog
+/dashboard
+/applications
+/api-keys
+/certificates
+
+# ============================================================================
+# MANUAL POST-BASED TESTS (not covered by GET-only wordlist fuzzing)
+# ============================================================================
+#
+# 1. Test open self-registration via JSON:API (real documented endpoint):
+# curl -s -X POST https://developertest2.discover.com/jsonapi/user/register \
+#   -H "Content-Type: application/vnd.api+json" \
+#   -H "Accept: application/vnd.api+json" \
+#   --data-raw '{"data":{"type":"user--user","attributes":{"name":"test_recon_check","mail":"test@example.com","pass":"TestPass123!"}}}'
+#
+# 2. Test password reset user enumeration (response differences reveal valid emails):
+# curl -s -X POST https://developertest2.discover.com/jsonapi/user/password/reset \
+#   -H "Content-Type: application/vnd.api+json" \
+#   -H "Accept: application/json" \
+#   --data-raw '{"data":{"type":"user--password-reset","attributes":{"mail":"test@example.com"}}}'
+#
+# 3. Check if JSON:API is read-only (safer) or read-write (higher risk):
+# curl -s https://developertest2.discover.com/admin/config/services/jsonapi
