@@ -1,0 +1,115 @@
+# === dndisputes_wsdl_wordlist_v2.txt ===
+# Merged from: SecLists (dirb/vulns/sap.txt patterns), MindAPI WSDL/WADL/OData
+# discovery cheatsheet, common ASP.NET (.asmx/.disco) and Java (Axis/CXF) SOAP
+# stack conventions, PLUS dispute/chargeback domain vocabulary guesses specific
+# to "dndisputes" (likely Discover Network Disputes).
+#
+# Format: path (no leading host). Combine with base host yourself, e.g.:
+#   https://dndisputes-pa.discover.com<PATH>
+#
+# Recommended: run against dndisputes-pa first (confirmed QAGateway = weaker tier)
+
+# ============ TIER 1: generic WSDL query-param discovery ============
+/?wsdl
+/?WSDL
+/?Wsdl
+/?wsdl=1
+/?singleWsdl
+/?disco
+/?DISCO
+
+# ============ TIER 2: .asmx / .disco (ASP.NET Web Services classic) ============
+/Service.asmx
+/Service.asmx?wsdl
+/Service.asmx?disco
+/Disputes.asmx
+/Disputes.asmx?wsdl
+/DisputeService.asmx
+/DisputeService.asmx?wsdl
+/DNDisputes.asmx
+/DNDisputes.asmx?wsdl
+/DNDisputesService.asmx?wsdl
+/Dispute.asmx?wsdl
+
+# ============ TIER 3: .svc (WCF) ============
+/Service.svc?wsdl
+/Service.svc?singleWsdl
+/DisputeService.svc?wsdl
+/DisputesService.svc?wsdl
+/DNDisputesService.svc?wsdl
+
+# ============ TIER 4: Java Axis/Axis2/CXF style /services paths ============
+/services?wsdl
+/services/?wsdl
+/axis/services?wsdl
+/axis2/services?wsdl
+/axis2/services/DisputeService?wsdl
+/axis2/services/DisputesService?wsdl
+/axis2/services/DNDisputesService?wsdl
+/axis2/services/ChargebackService?wsdl
+/axis2/services/CaseService?wsdl
+/services/DisputeService?wsdl
+/services/DisputesService?wsdl
+/services/DNDisputesService?wsdl
+/services/ChargebackService?wsdl
+/services/CaseService?wsdl
+/services/ClaimsService?wsdl
+
+# ============ TIER 5: generic service-name + ?wsdl (no path prefix) ============
+/DisputeService?wsdl
+/DisputesService?wsdl
+/DNDisputes?wsdl
+/DNDisputesService?wsdl
+/Dispute?wsdl
+/Disputes?wsdl
+/DisputeManagement?wsdl
+/DisputeManagementService?wsdl
+/DisputeResolutionService?wsdl
+/DisputeCaseService?wsdl
+/DisputeProcessingService?wsdl
+/ChargebackService?wsdl
+/ChargebackManagementService?wsdl
+/ClaimsService?wsdl
+/ClaimsManagementService?wsdl
+/AdjustmentService?wsdl
+/CaseService?wsdl
+/CaseManagementService?wsdl
+/MerchantDisputeService?wsdl
+/CardholderDisputeService?wsdl
+/TransactionDisputeService?wsdl
+/DisputeGateway?wsdl
+/DisputeGatewayService?wsdl
+
+# ============ TIER 6: version-suffixed / namespaced ============
+/DisputeServiceV1?wsdl
+/DisputeServiceV2?wsdl
+/v1/DisputeService?wsdl
+/v2/DisputeService?wsdl
+/DN/DisputeService?wsdl
+/network/DisputeService?wsdl
+/external/DisputeService?wsdl
+/gateway/DisputeService?wsdl
+
+# ============ TIER 7: WADL / OData / OpenAPI (in case it's not pure SOAP) ============
+/application.wadl
+/application.wadl?detail=true
+/api/application.wadl
+/$metadata
+/openapi.json
+/swagger.json
+/v2/api-docs
+
+# ============ TIER 8: IBM DataPower / enterprise gateway meta paths ============
+/servlet/soap
+/soap/servlet/messagerouter
+/gateway/wsdl
+/gateway?wsdl
+/status
+/health
+/actuator/health
+
+# ============ TIER 9: root-level docs/discovery ============
+/services
+/services/
+/?listServices
+/admin/services
