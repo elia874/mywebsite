@@ -1,0 +1,135 @@
+# === developertest2_wordlist.txt ===
+# Target: developertest2.discover.com (Discover Global Network developer portal)
+# Built from: (1) real-world Swagger/OpenAPI discovery paths, (2) common API
+# management/dev-portal platform conventions (Apigee, Kong, Azure APIM, AWS API
+# Gateway portals all use similar patterns since this is likely one of those
+# products under the hood), (3) portal-specific paths matching what you saw in
+# the UI ("Explore APIs", "Getting Started", "Manage Applications").
+#
+# Usage:
+#   python3 smartfuzz.py --host https://developertest2.discover.com --wordlist developertest2_wordlist.txt
+
+# ============ TIER 1: OpenAPI/Swagger spec discovery (highest value) ============
+/swagger-ui.html
+/swagger-ui/
+/swagger-ui/index.html
+/api-docs
+/api-docs/
+/v2/api-docs
+/v3/api-docs
+/swagger.json
+/openapi.json
+/api/swagger.json
+/docs
+/swagger/
+/swagger/index.html
+/swagger/v1/swagger.json
+/swagger/v2/swagger.json
+/swagger/v3/swagger.json
+/openapi/
+/openapi/v1/
+/openapi/v2/
+/openapi/v3/
+/api/v1/swagger.json
+/api/v2/swagger.json
+/api/v3/swagger.json
+/documentation
+/documentation/swagger
+/documentation/openapi
+/swagger/docs/v1
+/swagger/docs/v2
+/swagger/docs/v3
+/openapi/ui
+/api/swagger-ui.html
+/api/documentation
+/v1/documentation
+/v2/documentation
+/swagger-resources
+/swagger-resources/configuration/ui
+/swagger-resources/configuration/security
+/swagger.yaml
+/openapi.yaml
+/api/openapi.json
+/api/v1/openapi.json
+/api/v2/openapi.json
+
+# ============ TIER 2: dev-portal platform conventions (Apigee/Kong/Azure APIM style) ============
+/apis
+/apis/
+/api-catalog
+/api-catalog/
+/products
+/products/
+/apiproducts
+/api-products
+/portal/api
+/portal/apis
+/dp/api/docs
+/dp/apis
+/reference
+/reference/apis
+/api-reference
+
+# ============ TIER 3: matching visible portal sections from the UI ============
+/explore
+/explore-apis
+/getting-started
+/get-started
+/manage-applications
+/applications
+/apps
+/my-apps
+/register
+/signup
+/sign-up
+/register-app
+/api-keys
+/apikeys
+/credentials
+/certificates
+/download-certificate
+
+# ============ TIER 4: auth/account (dev portals almost always have these) ============
+/login
+/signin
+/sign-in
+/oauth/authorize
+/oauth/token
+/oauth2/token
+/account
+/profile
+/dashboard
+
+# ============ TIER 5: Discover-specific naming guesses ============
+/discover-network
+/dn-api
+/dnapi
+/global-network
+/gn-api
+/network-api
+/dispute-api
+/disputes-api
+
+# ============ TIER 6: config/metadata leaks common on dev portals ============
+/config.json
+/env.json
+/manifest.json
+/.well-known/openapi.json
+/version
+/version.json
+/health
+/status
+/actuator
+/actuator/health
+/actuator/env
+/actuator/info
+
+# ============ TIER 7: static asset / JS bundle discovery (for js_recon feed) ============
+/static/js/main.js
+/assets/js/app.js
+/js/app.js
+/main.js
+/bundle.js
+/app.js
+/runtime.js
+/vendor.js
